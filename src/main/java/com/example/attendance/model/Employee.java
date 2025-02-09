@@ -23,6 +23,16 @@ public class Employee {
     public Employee() {
     }
 
+    public Employee(Long id, Account account, String fullName, String gender,
+                    String phoneNumber, String department) {
+        this.id = id;
+        this.account = account;
+        this.fullName = fullName;
+        this.gender = gender;
+        this.phoneNumber = phoneNumber;
+        this.department = department;
+    }
+
     public Long getId() {
         return id;
     }

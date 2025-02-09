@@ -117,7 +117,7 @@
         </ul>
         <form style="margin-left: 10px" id="dateForm" action="/history" method="POST" class="d-flex align-items-center">
             <input style="height: 30px" type="date" id="selectedDate" name="attendanceDate" class="form-control">
-            <button style="margin-left: 5px; background-color: rgb(32,178,170);" type="submit" id="filterButton" class="btn btn-primary btn-sm ms-2">Lọc</button>
+            <button style="margin-left: 10px; background-color: rgb(32,178,170);" type="submit" id="filterButton" class="btn btn-primary btn-sm ms-2">Lọc</button>
         </form>
     </nav>
 
@@ -136,8 +136,9 @@
                 <ul class="nav nav-pills nav-sidebar flex-column">
                     <li class="nav-item"><a class="nav-link" href="/attendance"> <i class="fa fa-camera-retro nav-icon"></i> <p>Điểm danh</p></a></li>
                     <li class="nav-item"><a style="background-color: rgb(32,178,170)" class="nav-link active" href="/history"> <i class="fa fa-history nav-icon"></i> <p>Lịch sử</p></a></li>
-                    <li class="nav-item"><a class="nav-link" href="/timekeeping"> <i class="fa fa-history nav-icon"></i> <p>Chấm công</p></a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/registerFaceId}"> <i class="fa fa-plus-circle nav-icon" style="font-size:20px"></i> <p>Đăng ký</p></a></li>
+                    <li class="nav-item"><a th:href="@{/control}" class="nav-link"><i class="fa fa-wifi nav-icon"></i><p>Điều khiển cửa</p></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/timekeeping"> <i class="fa fa-pencil-square-o nav-icon"></i> <p>Chấm công</p></a></li>
                     <li class="nav-item"><a class="nav-link" href="/logout"> <i class="fa fa-sign-out nav-icon"></i> <p>Đăng xuất</p></a></li>
                 </ul>
             </nav>

@@ -16,7 +16,8 @@ public class AuthConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(sessionInterceptor)
-                .addPathPatterns("/attendance", "/history", "/timekeeping", "/findTimekeeping")  // Bảo vệ các trang này
+                .addPathPatterns("/attendance", "/history", "/timekeeping", "/findTimekeeping",
+                        "/registerFaceId", "/control")
                 .excludePathPatterns("/login");
     }
 }

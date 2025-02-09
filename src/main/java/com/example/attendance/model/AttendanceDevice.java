@@ -22,6 +22,13 @@ public class AttendanceDevice {
     public AttendanceDevice() {
     }
 
+    public AttendanceDevice(Long id, Account account, String deviceId, String deviceName) {
+        this.id = id;
+        this.account = account;
+        this.deviceId = deviceId;
+        this.deviceName = deviceName;
+    }
+
     public Long getId() {
         return id;
     }

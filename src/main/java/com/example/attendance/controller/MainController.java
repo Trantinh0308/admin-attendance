@@ -91,8 +91,8 @@ public class MainController {
     }
 
     @PostMapping("/history")
-    public String historyByDate(@RequestParam(value = "attendanceDate") @DateTimeFormat(pattern = "yyyy-MM-dd")
-                                    LocalDate attendanceDate,Model model) {
+    public String historyByDate(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate attendanceDate,
+                                Model model) {
         List<AttendanceDTO3> histories = attendanceService.getAttendanceByDate(Date.valueOf(attendanceDate));
         model.addAttribute("listH", histories);
         model.addAttribute("attendanceDate", attendanceDate);
@@ -128,5 +128,10 @@ public class MainController {
         model.addAttribute("month", month);
         model.addAttribute("year", String.valueOf(year));
         return "timekeeping";
+    }
+
+    @GetMapping("/control")
+    public String pageControl() {
+        return "control";
     }
 }

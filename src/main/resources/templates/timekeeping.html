@@ -4,44 +4,30 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Attendance</title>
-  <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- Tempusdominus Bbootstrap 4 -->
-  <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
-  <!-- iCheck -->
-  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- JQVMap -->
-  <link rel="stylesheet" href="plugins/jqvmap/jqvmap.min.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="dist/css/adminlte.min.css">
-  <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
-  <!-- Daterange picker -->
-  <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
-  <!-- summernote -->
-  <link rel="stylesheet" href="plugins/summernote/summernote-bs4.css">
-  <!-- Google Font: Source Sans Pro -->
-  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
     .number-span {
       position: relative;
       cursor: pointer;
       display: inline-block;
-      text-decoration: none; /* Bỏ gạch chân mặc định */
-      transition: text-decoration 0.3s; /* Hiệu ứng chuyển động cho gạch chân */
+      text-decoration: none;
+      transition: text-decoration 0.3s;
     }
 
     .number-span:hover {
-      text-decoration: underline; /* Thêm gạch chân khi hover */
+      text-decoration: underline;
     }
 
     .clickable-cell {
@@ -52,13 +38,13 @@
       color: inherit;
     }
     .table-bordered tbody tr:last-child {
-      border-bottom: 2px solid #000; /* Thêm đường viền ở dòng cuối của tbody */
+      border-bottom: 2px solid #000;
     }
     .table-bordered {
-      border: 1px solid #000; /* Định dạng đường viền cho bảng */
+      border: 1px solid #000;
     }
     .table-bordered th, .table-bordered td {
-      border: 1px solid #000; /* Định dạng đường viền cho cả dòng và cột */
+      border: 1px solid #000;
       font-size: 10px;
     }
     .table-bordered th.double-line {
@@ -70,38 +56,33 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      border-bottom: 2px solid #000; /* Đường kẻ ngang */
+      border-bottom: 2px solid #000;
     }
     .table-bordered th, .table-bordered td {
-      font-size: 13px; /* Đổi kích thước chữ */
-      text-align: center; /* Căn giữa nội dung trong ô */
-      padding: 2px; /* Điều chỉnh padding để thay đổi kích thước ô */
+      font-size: 13px;
+      text-align: center;
+      padding: 2px;
     }
 
-    /* Điều chỉnh kích thước của ô th trong header */
     .table-bordered thead th {
-      font-size: 12px; /* Đổi kích thước chữ của ô th */
-      padding: 2px; /* Điều chỉnh padding để thay đổi kích thước ô th */
+      font-size: 12px;
+      padding: 2px;
     }
 
-    /* Tùy chỉnh giao diện cho tùy chọn option */
     #chartSelect option {
-      font-size: 14px; /* Kích thước chữ */
-      background-color: #fff; /* Màu nền của option */
-      color: #333; /* Màu chữ của option */
+      font-size: 14px;
+      background-color: #fff;
+      color: #333;
     }
 
-    /* Tùy chỉnh giao diện khi select được nhấp chọn */
     #chartSelect:focus {
-      border-color: #007bff; /* Màu viền khi select được chọn */
+      border-color: #007bff;
       box-shadow: 0 0 5px rgb(64, 128, 128);
-      /* Hiệu ứng bóng khi select được chọn */
     }
 
-    /* Tùy chỉnh giao diện khi hover qua option */
     #chartSelect option:hover {
-      background-color: #007bff; /* Màu nền khi hover qua option */
-      color: #fff; /* Màu chữ khi hover qua option */
+      background-color: #007bff;
+      color: #fff;
     }
 
     #page-numbers1 button {
@@ -115,7 +96,6 @@
       justify-content: center;
       align-items: center;
       margin-top: 10px;
-      /* Điều chỉnh khoảng cách giữa container và pagination theo ý muốn */
     }
     #pagination1 #page-numbers1 :active{
       background-color: gray;
@@ -130,13 +110,13 @@
       margin-right: 1px;
       margin-left: 1px;
       width: 30px;
-      border: 1px solid black; /* Viền màu đen */
+      border: 1px solid black;
     }
 
     #page-numbers1 button.active {
-      border-color: gray; /* Viền màu đỏ cho nút đã chọn */
-      background-color: gray; /* Nền màu đỏ cho nút đã chọn */
-      color: white; /* Màu chữ trắng cho nút đã chọn */
+      border-color: gray;
+      background-color: gray;
+      color: white;
     }
     #page-numbers2 button {
       margin-right: 1px;
@@ -157,19 +137,17 @@
       margin-right: 1px;
       margin-left: 1px;
       width: 30px;
-      border: 1px solid black; /* Viền màu đen */
+      border: 1px solid black;
     }
 
     #page-numbers2 button.active {
-      border-color: gray; /* Viền màu đỏ cho nút đã chọn */
-      background-color: gray; /* Nền màu đỏ cho nút đã chọn */
-      color: white; /* Màu chữ trắng cho nút đã chọn */
+      border-color: gray;
+      background-color: gray;
+      color: white;
     }
     .form-select {
       height: 35px;
-      /* Điều chỉnh chiều cao của select */
       padding: 5px;
-      /* Điều chỉnh khoảng cách padding bên trong */
     }
 
   </style>
@@ -185,8 +163,8 @@
       </li>
     </ul>
 
-    <div class="col-md-2">
-      <select id="month" class="form-select">
+    <div style="margin-left: 13px">
+      <select id="month" class="form-select custom-select" style="width: 110px">
         <option selected disabled>Chọn tháng</option>
         <option value="1">Tháng 1</option>
         <option value="2">Tháng 2</option>
@@ -203,8 +181,8 @@
       </select>
     </div>
 
-    <div class="col-md-2">
-      <select id="year" class="form-select">
+    <div style="margin-left: 15px">
+      <select id="year" class="form-select custom-select" >
         <option selected disabled>Chọn năm</option>
         <option value="2020">2020</option>
         <option value="2021">2021</option>
@@ -220,13 +198,12 @@
       </select>
     </div>
 
-    <div class="col-md-2">
+    <div style="margin-left: 15px">
       <button style="height: 35px;background-color: rgb(32,178,170)" class="btn btn-primary" onclick="getSelectedValues()">Xem</button>
     </div>
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <!-- Messages Dropdown Menu -->
-
 
       <li class="nav-item" >
         <button style="margin-right: 10px;height: 34px;background-color: rgb(32,178,170); color: white" onclick="exportToExcel()" class="btn btn-info">Xuất excel</button>
@@ -253,8 +230,9 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item"><a class="nav-link" href="/attendance"> <i class="fa fa-camera-retro nav-icon"></i> <p>Điểm danh</p></a></li>
           <li class="nav-item"><a class="nav-link" href="/history"> <i class="fa fa-history nav-icon"></i> <p>Lịch sử</p></a></li>
-          <li class="nav-item"><a style="background-color: rgb(32,178,170)" class="nav-link active" href="/timekeeping"> <i class="fa fa-history nav-icon"></i> <p>Chấm công</p></a></li>
           <li class="nav-item"><a class="nav-link" href="/registerFaceId"> <i class="fa fa-plus-circle nav-icon" style="font-size:20px"></i> <p>Đăng ký</p></a></li>
+          <li class="nav-item"><a th:href="@{/control}" class="nav-link"><i class="fa fa-wifi nav-icon"></i><p>Điều khiển cửa</p></a></li>
+          <li class="nav-item"><a style="background-color: rgb(32,178,170)" class="nav-link active" href="/timekeeping"> <i class="fa fa-pencil-square-o nav-icon"></i> <p>Chấm công</p></a></li>
           <li class="nav-item"><a class="nav-link" href="/logout"> <i class="fa fa-sign-out nav-icon"></i> <p>Đăng xuất</p></a></li>
         </ul>
       </nav>
@@ -299,21 +277,13 @@
             </a>
           </td>
 
-          <!-- Hiển thị tổng -->
           <td th:text="${nhanvien.sum}"></td>
         </tr>
         </tbody>
-
       </table>
     </div>
   </div>
   <!-- /.content-wrapper -->
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
 <script th:inline="javascript">

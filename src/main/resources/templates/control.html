@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Manage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+    <!-- AdminLTE and other styles -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- jQuery (required by DataTables) -->
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-pzjw8f+ua7Kw1TIq0v8FqD/1GlPzbnDei/LdzsfQFL5f5ctxtV4R+hR8pcjw+oa6" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        .content-wrapper{
+            background-size: cover;
+            background-repeat: no-repeat;
+            /* background-color: rgba(0, 0, 0, 0.61); */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .box2 h2{
+            margin: 15px 0px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .devices{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .box{
+            width: 250px;
+            height: 235px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 5px 5px 10px gray;
+            padding: 10px 20px;
+            position: relative;
+            margin: 20px;
+        }
+
+        .box p{
+            color: black;
+            font-size: 20px;
+            font-weight: bold;
+            padding-left: 5px;
+        }
+
+        .box img{
+            width: 35px;
+            height: 35px;
+            position: absolute;
+            top:27px;
+            left: 175px;
+        }
+
+        .box .light{
+            display: none;
+            color: #3976f6;
+            font-size: 35px;
+            position: absolute;
+            top:29px;
+            left: 170px;
+        }
+
+        /* toggle */
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin: 35px 30px 0px 65px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        @keyframes rotation {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(359deg);
+            }
+        }
+
+        .color-palette span {
+            display: none;
+            font-size: 12px;
+        }
+
+        .color-palette:hover span {
+            display: block;
+        }
+
+        .color-palette.disabled span {
+            display: block;
+            text-align: left;
+            padding-left: .75rem;
+        }
+
+        .color-palette-box h4 {
+            position: absolute;
+            left: 1.25rem;
+            margin-top: .75rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            display: block;
+            z-index: 7;
+        }
+
+    </style>
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="height: 45px">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <div style="height: 430px" class="sidebar">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <i style="margin-left: 10px;margin-top: 10px;color: white;" class="fa fa-user-circle nav-icon"></i>
+            </div>
+            <div class="info">
+                <a href="#" class="d-block" style="text-decoration: none" th:if="${session.username!=null}">[[${session.username}]]</a>
+            </div>
+        </div>
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column">
+                <li class="nav-item"><a class="nav-link" href="/attendance"> <i class="fa fa-camera-retro nav-icon"></i> <p>Điểm danh</p></a></li>
+                <li class="nav-item"><a class="nav-link" href="/history"> <i class="fa fa-history nav-icon"></i> <p>Lịch sử</p></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/registerFaceId}"> <i class="fa fa-plus-circle nav-icon" style="font-size:20px"></i> <p>Đăng ký</p></a></li>
+                <li class="nav-item"><a style="background-color: rgb(32,178,170)"  th:href="@{/control}" class="nav-link active"><i class="fa fa-wifi nav-icon"></i><p>Điều khiển cửa</p></a></li>
+                <li class="nav-item"><a class="nav-link" href="/timekeeping"> <i class="fa fa-pencil-square-o nav-icon"></i> <p>Chấm công</p></a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout"> <i class="fa fa-sign-out nav-icon"></i> <p>Đăng xuất</p></a></li>
+            </ul>
+        </nav>
+    </div>
+</aside>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper" style="background-color: #dedede">
+    <div class="container">
+        <div class="dashboard">
+            <div class="devices">
+                <div class="row1">
+                    <div class="box">
+                        <p style="text-align: center; font-size: 25px; margin-top: 30px">Cửa</p>
+                        <i class="fas fa-lightbulb-on light"
+                           style="width: 25px; height: 25px; color: #3976f6;"></i>
+                        <div style="display: flex;"> <label style="font-size: 20px;margin-top: 12px;margin-left: 14px;">Auto</label> <label
+                                style="margin: 12px 46px;" class="switch"> <input
+                                type="checkbox" id="modeControl2" onchange="modeControlDoor()"><span
+                                class="slider round"></span>
+                        </label> </div>
+                        <i class="fas fa-lightbulb-on light"
+                           style="width: 25px; height: 25px; color: #3976f6;"></i>
+                        <div style="display: flex;">
+                            <label style="font-size: 20px;margin-top: 12px;margin-left: 14px;">Open</label>
+                            <label
+                                style="margin: 12px 40px;" class="switch"> <input
+                                type="checkbox" id="lightswitch2" onchange="door()"> <span
+                                class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const modeControl = document.getElementById("modeControl2");
+    const lightSwitch = document.getElementById("lightswitch2");
+    const ipESP = "http://192.168.159.18";
+    const xhr = new XMLHttpRequest();
+
+    window.onload = function() {
+        fetch('/api/mode/status')
+            .then(response => response.json())
+            .then(status => {
+                modeControl.checked = status;
+                if (modeControl.checked) {
+                    lightSwitch.disabled = true;
+                } else {
+                    lightSwitch.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching control status:', error);
+            });
+
+        fetch('/api/door/status')
+            .then(response => response.json())
+            .then(status => {
+                if (modeControl.checked) {
+                    lightSwitch.checked = status;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching control status:', error);
+            });
+    };
+
+    function modeControlDoor() {
+        if (modeControl.checked) {
+            lightSwitch.disabled = true;
+            sendModeToServer(true);
+        } else {
+            lightSwitch.disabled = false;
+            sendModeToServer(false);
+        }
+    }
+
+    function sendModeToServer(auto) {
+        fetch('/api/mode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ auto: auto })
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Mode control updated successfully.');
+                } else {
+                    console.error('Error updating mode control.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function saveDoorStatus(isOpen) {
+        fetch('/api/door/status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ open: isOpen })
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Mode control updated successfully.');
+                } else {
+                    console.error('Error updating mode control.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+
+    function door() {
+        if (lightSwitch.checked) {
+            xhr.open("GET", ipESP+"/on", true);
+            xhr.send();
+            saveDoorStatus(true)
+        } else {
+            xhr.open("GET", ipESP+"/off", true);
+            xhr.send();
+            saveDoorStatus(false)
+        }
+    }
+
+    const socketControl = new SockJS('/websocket');
+    const stompClient = Stomp.over(socketControl);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/control', function (messageOutput) {
+            var open = messageOutput.body === 'true';
+            if (modeControl.checked) {
+                lightSwitch.checked = open;
+                door();
+            }
+        });
+    });
+</script>
+
+<!-- jQuery -->
+<script src="../../plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="../../dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../dist/js/demo.js"></script>
+
+</body>
+</html>

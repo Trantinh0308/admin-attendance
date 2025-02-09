@@ -25,6 +25,9 @@ public class EmployeeService {
     public Optional<Employee> getEmployeeById(long id){
         return employeeRepository.findById(id);
     }
+    public Optional<Long> getEmployeeIdByAccountId(long accountId){
+        return employeeRepository.findEmployeeIdByAccountId(accountId);
+    }
     public Employee saveEmployee(EmployeeDTO employeeDTO){
         Account account = new Account();
         account.setUsername(employeeDTO.getPhoneNumber());

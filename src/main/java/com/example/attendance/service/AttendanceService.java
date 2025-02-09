@@ -42,8 +42,10 @@ public class AttendanceService {
         return attendanceRequest;
     }
 
-    public List<AttendanceDTO3> getAttendanceByEmployeeAndDate(Long employeeId, Date attendanceDate) {
-        return attendanceRepository.findAllAttendanceByEmployeeIdAndDate(employeeId, attendanceDate);
+    public List<AttendanceDTO3> getAttendanceByAccountIdAndDate(long accountId, Date attendanceDate) {
+        Long employeeId = employeeService.getEmployeeIdByAccountId(accountId)
+                .orElseThrow(() -> new BadRequestAlertException("Id not found", ENTITY_NAME, "idNotFound"));
+        return attendanceRepository.findAllAttendanceByEmployeeIdAndDate(employeeId,attendanceDate);
     }
 
     public List<AttendanceDTO3> getAttendanceByDate(Date attendanceDate) {

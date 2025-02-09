@@ -28,6 +28,17 @@ public class Attendance {
     public Attendance() {
     }
 
+    public Attendance(Long id, Employee employee, String deviceName, String imageCode,
+                      Date date, Time time, String status) {
+        this.id = id;
+        this.employee = employee;
+        this.deviceName = deviceName;
+        this.imageCode = imageCode;
+        this.date = date;
+        this.time = time;
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
