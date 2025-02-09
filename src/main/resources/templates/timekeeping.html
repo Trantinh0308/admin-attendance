@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Attendance</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bbootstrap 4 -->
+  <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="plugins/jqvmap/jqvmap.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
+  <!-- summernote -->
+  <link rel="stylesheet" href="plugins/summernote/summernote-bs4.css">
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .number-span {
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      text-decoration: none; /* Bỏ gạch chân mặc định */
+      transition: text-decoration 0.3s; /* Hiệu ứng chuyển động cho gạch chân */
+    }
+
+    .number-span:hover {
+      text-decoration: underline; /* Thêm gạch chân khi hover */
+    }
+
+    .clickable-cell {
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      color: inherit;
+    }
+    .table-bordered tbody tr:last-child {
+      border-bottom: 2px solid #000; /* Thêm đường viền ở dòng cuối của tbody */
+    }
+    .table-bordered {
+      border: 1px solid #000; /* Định dạng đường viền cho bảng */
+    }
+    .table-bordered th, .table-bordered td {
+      border: 1px solid #000; /* Định dạng đường viền cho cả dòng và cột */
+      font-size: 10px;
+    }
+    .table-bordered th.double-line {
+      position: relative;
+    }
+    .table-bordered th.double-line::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      border-bottom: 2px solid #000; /* Đường kẻ ngang */
+    }
+    .table-bordered th, .table-bordered td {
+      font-size: 13px; /* Đổi kích thước chữ */
+      text-align: center; /* Căn giữa nội dung trong ô */
+      padding: 2px; /* Điều chỉnh padding để thay đổi kích thước ô */
+    }
+
+    /* Điều chỉnh kích thước của ô th trong header */
+    .table-bordered thead th {
+      font-size: 12px; /* Đổi kích thước chữ của ô th */
+      padding: 2px; /* Điều chỉnh padding để thay đổi kích thước ô th */
+    }
+
+    /* Tùy chỉnh giao diện cho tùy chọn option */
+    #chartSelect option {
+      font-size: 14px; /* Kích thước chữ */
+      background-color: #fff; /* Màu nền của option */
+      color: #333; /* Màu chữ của option */
+    }
+
+    /* Tùy chỉnh giao diện khi select được nhấp chọn */
+    #chartSelect:focus {
+      border-color: #007bff; /* Màu viền khi select được chọn */
+      box-shadow: 0 0 5px rgb(64, 128, 128);
+      /* Hiệu ứng bóng khi select được chọn */
+    }
+
+    /* Tùy chỉnh giao diện khi hover qua option */
+    #chartSelect option:hover {
+      background-color: #007bff; /* Màu nền khi hover qua option */
+      color: #fff; /* Màu chữ khi hover qua option */
+    }
+
+    #page-numbers1 button {
+      margin-right: 1px;
+      margin-left: 1px;
+      width: 30px;
+    }
+
+    #pagination1 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+      /* Điều chỉnh khoảng cách giữa container và pagination theo ý muốn */
+    }
+    #pagination1 #page-numbers1 :active{
+      background-color: gray;
+    }
+    #page-numbers1 button.active {
+      border-color: gray !important;
+      background-color: gray !important;
+      color: white !important;
+    }
+
+    #page-numbers1 button {
+      margin-right: 1px;
+      margin-left: 1px;
+      width: 30px;
+      border: 1px solid black; /* Viền màu đen */
+    }
+
+    #page-numbers1 button.active {
+      border-color: gray; /* Viền màu đỏ cho nút đã chọn */
+      background-color: gray; /* Nền màu đỏ cho nút đã chọn */
+      color: white; /* Màu chữ trắng cho nút đã chọn */
+    }
+    #page-numbers2 button {
+      margin-right: 1px;
+      margin-left: 1px;
+      width: 30px;
+    }
+
+    #pagination2 #page-numbers2 :active{
+      background-color: gray;
+    }
+    #page-numbers2 button.active {
+      border-color: gray !important;
+      background-color: gray !important;
+      color: white !important;
+    }
+
+    #page-numbers2 button {
+      margin-right: 1px;
+      margin-left: 1px;
+      width: 30px;
+      border: 1px solid black; /* Viền màu đen */
+    }
+
+    #page-numbers2 button.active {
+      border-color: gray; /* Viền màu đỏ cho nút đã chọn */
+      background-color: gray; /* Nền màu đỏ cho nút đã chọn */
+      color: white; /* Màu chữ trắng cho nút đã chọn */
+    }
+    .form-select {
+      height: 35px;
+      /* Điều chỉnh chiều cao của select */
+      padding: 5px;
+      /* Điều chỉnh khoảng cách padding bên trong */
+    }
+
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="height: 45px">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+    </ul>
+
+    <div class="col-md-2">
+      <select id="month" class="form-select">
+        <option selected disabled>Chọn tháng</option>
+        <option value="1">Tháng 1</option>
+        <option value="2">Tháng 2</option>
+        <option value="3">Tháng 3</option>
+        <option value="4">Tháng 4</option>
+        <option value="5">Tháng 5</option>
+        <option value="6">Tháng 6</option>
+        <option value="7">Tháng 7</option>
+        <option value="8">Tháng 8</option>
+        <option value="9">Tháng 9</option>
+        <option value="10">Tháng 10</option>
+        <option value="11">Tháng 11</option>
+        <option value="12">Tháng 12</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <select id="year" class="form-select">
+        <option selected disabled>Chọn năm</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+        <option value="2030">2030</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <button style="height: 35px;background-color: rgb(32,178,170)" class="btn btn-primary" onclick="getSelectedValues()">Xem</button>
+    </div>
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+      <!-- Messages Dropdown Menu -->
+
+
+      <li class="nav-item" >
+        <button style="margin-right: 10px;height: 34px;background-color: rgb(32,178,170); color: white" onclick="exportToExcel()" class="btn btn-info">Xuất excel</button>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <div class="sidebar">
+      <!-- Sidebar user (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <i style="margin-left: 9px;margin-top: 10px;color: white;" class="fa fa-user-circle nav-icon"></i>
+        </div>
+        <div class="info">
+          <a href="#" class="d-block" style="text-decoration: none" th:if = "${session.username!=null}">[[${session.username}]]</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-item"><a class="nav-link" href="/attendance"> <i class="fa fa-camera-retro nav-icon"></i> <p>Điểm danh</p></a></li>
+          <li class="nav-item"><a class="nav-link" href="/history"> <i class="fa fa-history nav-icon"></i> <p>Lịch sử</p></a></li>
+          <li class="nav-item"><a style="background-color: rgb(32,178,170)" class="nav-link active" href="/timekeeping"> <i class="fa fa-history nav-icon"></i> <p>Chấm công</p></a></li>
+          <li class="nav-item"><a class="nav-link" href="/registerFaceId"> <i class="fa fa-plus-circle nav-icon" style="font-size:20px"></i> <p>Đăng ký</p></a></li>
+          <li class="nav-item"><a class="nav-link" href="/logout"> <i class="fa fa-sign-out nav-icon"></i> <p>Đăng xuất</p></a></li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <div class="container">
+      <table class="table table-striped table-bordered">
+        <thead style="background-color: #99FFFF">
+        <tr>
+          <th style="width: 4px; font-size: 13px; vertical-align: middle;">STT</th>
+          <th style="width: 40px; font-size: 13px; vertical-align: middle;">Mã</th>
+          <th style="font-size: 13px; vertical-align: middle;">Tên
+            nhân viên</th>
+          <th th:each="c: ${listC}">
+            <div class="text-center">
+              [[${c.dayOfWeek}]] <br>
+              [[${c.day}]]
+            </div>
+
+          </th>
+          <th style="font-size: 11px; vertical-align: middle;">Tổng</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="nhanvien, iterStat: ${timekeepingList}">
+          <td th:text="${iterStat.count}"></td> <!-- Số thứ tự -->
+          <td th:text="${nhanvien.employee.id}"></td> <!-- ID nhân viên -->
+          <td style="font-weight: bold" th:text="${nhanvien.employee.fullName}"></td> <!-- Tên nhân viên -->
+
+          <!-- Vòng lặp qua danh sách chấm công của nhân viên -->
+          <td th:each="chamcong, iterStat: ${nhanvien.listTimekeeping}" class="text-center">
+            <a  th:href="@{'/check?id=' + ${nhanvien.employee.id} + '&day=' + ${iterStat.count} + '&monthYear=' + ${monthY}}"  class="clickable-cell" >
+              <span th:if="${chamcong == 1}" class="number-span" style="color: black; font-size: 14px">1</span>
+              <span th:if="${chamcong == 0.5}" class="number-span" style="color: black;">0.5</span>
+              <span th:if="${chamcong == 0}" class="number-span" style="color: red; font-size: 14px">0</span>
+            </a>
+          </td>
+
+          <!-- Hiển thị tổng -->
+          <td th:text="${nhanvien.sum}"></td>
+        </tr>
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+<script th:inline="javascript">
+  var month = /*[[${month}]]*/ "";
+  var year = /*[[${year}]]*/ "";
+  if (!month || !year) {
+    var currentDate = new Date();
+    month = currentDate.getMonth() + 1;
+    year = currentDate.getFullYear();
+  }
+  document.getElementById("month").value = month;
+  document.getElementById("year").value = year;
+
+  function getSelectedValues() {
+    // Lấy giá trị tháng và năm từ các select
+    var month = document.getElementById("month").value;
+    var year = document.getElementById("year").value;
+
+    if(month && year) {
+      var url = "http://localhost:8686/findTimekeeping?month=" + month + "&year=" + year;
+      window.location.href = url;
+    } else {
+      alert("Vui lòng chọn cả tháng và năm!");
+    }
+  }
+</script>
+<script>
+  function exportToExcel() {
+    var table = document.querySelector('.table-striped');
+
+    var data = [];
+    var headerRow = [];
+    for (var i = 0; i < table.rows[0].cells.length; i++) {
+      headerRow.push(table.rows[0].cells[i].innerText.trim());
+    }
+    data.push(headerRow);
+
+    for (var i = 1; i < table.rows.length; i++) {
+      var row = [];
+      for (var j = 0; j < table.rows[i].cells.length; j++) {
+        row.push(table.rows[i].cells[j].innerText.trim());
+      }
+      data.push(row);
+    }
+
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(data);
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    XLSX.writeFile(wb, 'chamcong.xlsx');
+  }
+</script>
+
+<script src="../../dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../dist/js/demo.js"></script>
+</body>
+</html>

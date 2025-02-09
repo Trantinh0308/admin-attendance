@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Register</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .auth-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Login & Register Form -->
+<div class="auth-container">
+  <!-- Login Form -->
+  <div id="login-form">
+    <h3 class="text-center mb-3">Đăng nhập</h3>
+    <form id="loginForm" th:action="@{/login}" th:method="POST">
+      <div class="mb-3">
+        <label for="loginUsername" class="form-label">Tài khoản</label>
+        <input type="text" class="form-control" id="loginUsername" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label for="loginPassword" class="form-label">Mật khẩu</label>
+        <input type="password" class="form-control" id="loginPassword" name="password" required>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+        <label class="form-check-label" for="rememberMe">Ghi nhớ</label>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Xác nhận</button>
+    </form>
+    <div class="text-center mt-3">
+      <p>Bạn chưa có tài khoản? <a href="javascript:void(0);" onclick="showRegisterForm()">Đăng ký</a></p>
+    </div>
+  </div>
+
+  <!-- Register Form -->
+  <div id="register-form" style="display: none;">
+    <h3 class="text-center mb-3">Đăng ký</h3>
+    <form id="registerForm" th:action="@{/register}" th:method="POST">
+      <div class="mb-3">
+        <label for="registerUsername" class="form-label">Tài khoản</label>
+        <input type="text" class="form-control" id="registerUsername" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label for="registerPassword" class="form-label">Mât khẩu</label>
+        <input type="password" class="form-control" id="registerPassword" name="password" required>
+      </div>
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Đăng ký </button>
+    </form>
+    <div class="text-center mt-3">
+      <p>Bạn đã có tài khoản? <a href="javascript:void(0);" onclick="showLoginForm()">Đăng nhập</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+  var notice = /*[[${error}]]*/ "";
+  if (notice) {
+    setTimeout(function() {
+      alert(notice);
+    }, 100);
+  }
+
+  function showLoginForm() {
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'block';
+  }
+
+  function showRegisterForm() {
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('register-form').style.display = 'block';
+  }
+
+  function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    let expires = "expires=" + d.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+  }
+
+  function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  window.onload = function() {
+    let savedUsername = getCookie("username");
+    let savedPassword = getCookie("password");
+    let rememberMeChecked = getCookie("rememberMe") === "true";
+
+    if (savedUsername && savedPassword) {
+      document.getElementById('loginUsername').value = savedUsername;
+      document.getElementById('loginPassword').value = savedPassword;
+      document.getElementById('rememberMe').checked = rememberMeChecked;
+    }
+  };
+
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+
+    if (rememberMe) {
+      setCookie("username", username, 30);
+      setCookie("password", password, 30);
+      setCookie("rememberMe", true, 30);
+    } else {
+      setCookie("username", "", -1);
+      setCookie("password", "", -1);
+      setCookie("rememberMe", "", -1);
+    }
+    this.submit();
+  });
+</script>
+
+</body>
+</html>
