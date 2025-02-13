@@ -3,7 +3,10 @@ package com.example.attendance.controller;
 import com.example.attendance.dto.AttendanceDTO;
 import com.example.attendance.dto.AttendanceDTO3;
 import com.example.attendance.dto.EmployeeDTO;
+import com.example.attendance.dto.UserDTO;
 import com.example.attendance.errors.BadRequestAlertException;
+import com.example.attendance.errors.ErrorResponse;
+import com.example.attendance.errors.InvalidMobileIdException;
 import com.example.attendance.model.Account;
 import com.example.attendance.model.Attendance;
 import com.example.attendance.model.Employee;
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -43,13 +47,22 @@ public class ApiController {
      * account_api
      */
 
-    @PostMapping("/login")
-    public ResponseEntity<Account> login(@RequestParam String username, @RequestParam String password) {
-        Account authenticatedAccount = accountService.getAccount(username, password);
-        if (authenticatedAccount == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @PostMapping("/user/login")
+    public ResponseEntity<Object> getUserAccount(@RequestBody UserDTO userDTO) {
+        try {
+            Account account = accountService.loginUserAccount(userDTO);
+            return ResponseEntity.ok(account);
+
+        } catch (AccountNotFoundException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+
+        } catch (InvalidMobileIdException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
-        return ResponseEntity.ok(authenticatedAccount);
     }
 
     /**
@@ -57,7 +70,7 @@ public class ApiController {
      */
 
     @GetMapping("/employee")
-    public ResponseEntity<List<Employee>> getAllEmployee() {
+    public ResponseEntity<Object> getAllEmployee() {
         try {
             List<Employee> employees = employeeService.getAllEmployees();
             if (employees.isEmpty()) {
@@ -65,19 +78,19 @@ public class ApiController {
             }
             return ResponseEntity.ok(employees);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
     @PostMapping("/employee")
-    public ResponseEntity<Map<String, Long>> registerEmployee(@RequestBody EmployeeDTO employeeRequest) {
+    public ResponseEntity<Object> registerEmployee(@RequestBody EmployeeDTO employeeRequest) {
         try {
             Employee employee = employeeService.saveEmployee(employeeRequest);
             Map<String, Long> response = new HashMap<>();
             response.put("id", employee.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -87,24 +100,31 @@ public class ApiController {
         return employee.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/employeeId")
+    public ResponseEntity<Long> getEmployeeByAccountId(@RequestParam("accountId") Long accountId) {
+        Optional<Long> employee = employeeService.getEmployeeIdByAccountId(accountId);
+        return employee.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     /**
      * attendance_api
      */
 
     @PostMapping("/attendance")
-    public ResponseEntity<Attendance> saveAttendance(@RequestBody AttendanceDTO attendanceDTO) {
+    public ResponseEntity<Object> saveAttendance(@RequestBody AttendanceDTO attendanceDTO) {
         try {
             Attendance attendance = attendanceService.save(attendanceDTO);
             return new ResponseEntity<>(attendance, HttpStatus.CREATED);
+
         } catch (BadRequestAlertException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
     @GetMapping("/attendance")
-    public ResponseEntity<List<AttendanceDTO3>> getAttendanceByAccountIdAndDate(
+    public ResponseEntity<Object> getAttendanceByAccountIdAndDate(
             @RequestParam long accountId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate attendanceDate) {
 
@@ -112,9 +132,9 @@ public class ApiController {
             List<AttendanceDTO3> attendanceList = attendanceService.getAttendanceByAccountIdAndDate(accountId, Date.valueOf(attendanceDate));
             return ResponseEntity.ok(attendanceList);
         } catch (BadRequestAlertException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 

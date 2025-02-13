@@ -166,8 +166,14 @@
                 <tr th:each="item, itemStat : ${listH}">
                     <td th:text="${itemStat.index + 1}"></td>
                     <td style="width: 50px; height: 50px; padding: 0; overflow: hidden;">
-                        <img th:src="'data:image/jpeg;base64,' + ${item.employeeImage}"  alt="Employee Image"
+                        <img th:if="${item.employeeImage != null and item.employeeImage != ''}"
+                             th:src="|data:image/jpeg;base64,${item.employeeImage}|"
+                             alt="Employee Image"
                              class="zoom-image" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
+                             onclick="openModal(this)">
+                        <img th:unless="${item.employeeImage != null and item.employeeImage != ''}"
+                             th:src="@{/img/phone.png}"  alt="Employee Image"
+                             class="zoom-image" style="width: 70%; height: 70%; object-fit: cover; cursor: pointer;margin-top: 15%"
                              onclick="openModal(this)">
                     </td>
                     <td>[[${item.employeeCode}]]</td>

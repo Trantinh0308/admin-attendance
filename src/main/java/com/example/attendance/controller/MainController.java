@@ -38,7 +38,7 @@ public class MainController {
     @PostMapping("/login")
     public String login(@RequestParam("username") String username,HttpSession session,
                           @RequestParam("password") String password, Model model) {
-        Account account = accountService.getAccount(username, password);
+        Account account = accountService.loginAdminAccount(username, password);
         if (account == null || account.getRole() != 1) {
             model.addAttribute(Constants.ERROR, Constants.ERROR_LOGIN);
             return Constants.PAGE_LOGIN;
