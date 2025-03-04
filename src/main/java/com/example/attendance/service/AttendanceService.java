@@ -20,59 +20,67 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final EmployeeService employeeService;
 
-    public AttendanceService(SimpMessagingTemplate messagingTemplate, AttendanceRepository attendanceRepository, EmployeeService employeeService) {
+    public AttendanceService(SimpMessagingTemplate messagingTemplate, AttendanceRepository attendanceRepository,
+                             EmployeeService employeeService) {
         this.messagingTemplate = messagingTemplate;
         this.attendanceRepository = attendanceRepository;
         this.employeeService = employeeService;
     }
 
     public Attendance save(AttendanceDTO attendanceDTO) {
-        if (attendanceDTO.getEmployeeId() == null) {
-            throw new BadRequestAlertException("Id not exists", ENTITY_NAME, "idexists");
-        }
-        Employee employee = employeeService.getEmployeeById(attendanceDTO.getEmployeeId())
-                .orElseThrow(() -> new BadRequestAlertException("Employee not found", ENTITY_NAME, "employeeNotFound"));
+        Employee employee = getEmployee(attendanceDTO.getEmployeeId());
+        long attendanceQuantity = getNumberAttendanceInToday(attendanceDTO.getEmployeeId());
 
-        Attendance attendanceRequest = createAttendance(attendanceDTO, employee);
-
+        String attendanceStatus = Utils.getAttendanceStatusByQuantity(attendanceQuantity);
+        Attendance attendanceRequest = createAttendance(attendanceDTO, employee, attendanceStatus);
         if ("camera".equalsIgnoreCase(attendanceDTO.getAttendanceDevice())) {
-            sendCameraAttendanceInfo(attendanceDTO, employee);
+            sendAttendanceInfo(attendanceDTO, employee);
         }
 
         return attendanceRequest;
     }
 
+    public long getNumberAttendanceInToday(long employeeId){
+        if (Boolean.FALSE.equals(employeeService.checkExistsEmployeeById(employeeId))) throw new BadRequestAlertException("Employee not found", ENTITY_NAME, "employeeNotFound");
+        return attendanceRepository.countByDateAndEmployeeId(employeeId);
+    }
+
     public List<AttendanceDTO3> getAttendanceByAccountIdAndDate(long accountId, Date attendanceDate) {
-        Long employeeId = employeeService.getEmployeeIdByAccountId(accountId)
-                .orElseThrow(() -> new BadRequestAlertException("Id not found", ENTITY_NAME, "idNotFound"));
-        return attendanceRepository.findAllAttendanceByEmployeeIdAndDate(employeeId,attendanceDate);
+        Long employeeId = getEmployeeIdByAccount(accountId);
+        return attendanceRepository.findAllAttendanceByEmployeeIdAndDate(employeeId, attendanceDate);
     }
 
     public List<AttendanceDTO3> getAttendanceByDate(Date attendanceDate) {
         return attendanceRepository.findAllAttendanceByDate(attendanceDate);
     }
 
-    private Attendance createAttendance(AttendanceDTO attendanceDTO, Employee employee) {
+    private Attendance createAttendance(AttendanceDTO attendanceDTO, Employee employee, String status) {
         Attendance attendance = new Attendance();
         attendance.setEmployee(employee);
         attendance.setImageCode(attendanceDTO.getImageCode());
         attendance.setDate(attendanceDTO.getDate());
         attendance.setTime(attendanceDTO.getTime());
-
-        if ("camera".equalsIgnoreCase(attendanceDTO.getAttendanceDevice())) {
-            attendance.setDeviceName("Camera");
-        } else {
-            attendance.setDeviceName("Mobile");
-        }
-
-        String status = attendanceRepository.existsByEmployee_IdAndDate(attendanceDTO.getEmployeeId(), attendanceDTO.getDate())
-                ? "Check out" : "Check in";
+        attendance.setDeviceName(getDeviceName(attendanceDTO.getAttendanceDevice()));
         attendance.setStatus(status);
 
         return attendanceRepository.save(attendance);
     }
 
-    private void sendCameraAttendanceInfo(AttendanceDTO attendanceDTO, Employee employee) {
+    private String getDeviceName(String attendanceDevice) {
+        return "camera".equalsIgnoreCase(attendanceDevice) ? "Camera" : "Mobile";
+    }
+
+    private Employee getEmployee(Long employeeId) {
+        return employeeService.getEmployeeById(employeeId)
+                .orElseThrow(() -> new BadRequestAlertException("Employee not found", ENTITY_NAME, "employeeNotFound"));
+    }
+
+    private Long getEmployeeIdByAccount(long accountId) {
+        return employeeService.getEmployeeIdByAccountId(accountId)
+                .orElseThrow(() -> new BadRequestAlertException("Id not found", ENTITY_NAME, "idNotFound"));
+    }
+
+    private void sendAttendanceInfo(AttendanceDTO attendanceDTO, Employee employee) {
         AttendanceDTO2 attendanceDTO2 = new AttendanceDTO2();
         attendanceDTO2.setEmployeeName(employee.getFullName());
         attendanceDTO2.setImageCode(attendanceDTO.getImageCode());

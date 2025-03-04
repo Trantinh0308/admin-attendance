@@ -172,28 +172,21 @@
     const centerText = document.getElementById('center-text');
     let bar;
 
-    // Khi nhấn "Thêm mới", bật form và thay đổi nội dung nút
     submitButton.addEventListener('click', function () {
         const form = document.getElementById('employeeForm');
 
-        // Kiểm tra khi nút là "Thêm mới"
         if (submitButton.textContent === 'Thêm mới') {
             if (bar) {
-                bar.destroy(); // Hủy bỏ đối tượng ProgressBar nếu đã có
+                bar.destroy();
             }
 
-            // Ẩn center-text nếu có
             centerText.style.display = 'none';
             form.reset();
-
-            // Bật các trường trong form và đổi nút thành "Xác nhận"
             formElements.forEach(element => element.disabled = false);
             submitButton.textContent = 'Xác nhận';
         } else {
-            // Khi nút là "Xác nhận", bỏ disabled và validate form
-            formElements.forEach(element => element.disabled = false);  // Bỏ disabled để có thể nhập liệu và validate
+            formElements.forEach(element => element.disabled = false);
 
-            // Kiểm tra tính hợp lệ của form
             if (form.checkValidity()) {
                 const formData = new FormData(form);
                 const employeeData = {
@@ -203,7 +196,6 @@
                     department: document.getElementById('department').options[document.getElementById('department').selectedIndex].text
                 };
 
-                // Gửi POST request đến API /employee
                 fetch('http://localhost:8686/api/employee', {
                     method: 'POST',
                     headers: {
@@ -213,79 +205,73 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                        if (data && data.id) {
+                        if (data && data.errorMessage === "PhoneNumber exists") {
+                            alert('Số điện thoại đã tồn tại!');
+                        } else if (data && data.id) {
                             const employeeId = data.id;
 
-                            // Gửi POST request đến API /capture_images
-                            return fetch('http://localhost:8888/capture_images', {
+                            return fetch('http://localhost:9999/capture_images', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({ id: employeeId })
-                            });
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Có lỗi khi bắt đầu capture images!');
+                                    }
+
+                                    const imageElement = document.getElementById('camera');
+                                    const imageUrl = 'http://localhost:9999/capture_images';
+                                    imageElement.src = imageUrl;
+                                    alert('Bắt đầu lấy dữ liệu khuôn mặt');
+
+                                    setTimeout(() => {
+                                        centerText.style.display = 'block';
+                                        bar = new ProgressBar.Circle('#progress-circle', {
+                                            color: '#4caf50',
+                                            strokeWidth: 6,
+                                            trailWidth: 6,
+                                            trailColor: '#ddd',
+                                            easing: 'easeInOut',
+                                            duration: 20000,
+                                            text: {
+                                                value: '',
+                                            },
+                                            from: { color: '#4caf50', width: 6 },
+                                            to: { color: '#4caf50', width: 6 },
+                                            step: function (state, circle) {
+                                                circle.path.setAttribute('stroke', state.color);
+                                                circle.path.setAttribute('stroke-width', state.width);
+
+                                                const value = Math.round(circle.value() * 100);
+                                                centerText.textContent = value + '%';
+
+                                                if (value === 100) {
+                                                    centerText.innerHTML = '&#10004;';
+                                                    submitButton.textContent = 'Thêm mới';
+                                                    formElements.forEach(element => element.disabled = true);
+                                                }
+                                            }
+                                        });
+
+                                        bar.animate(1.0);
+                                    }, 2000);
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('Có lỗi xảy ra!');
+                                });
                         } else {
                             alert('Lỗi khi tạo nhân viên!');
                         }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Có lỗi khi bắt đầu capture images!');
-                        }
-
-                        // Tạo đối tượng video element và hiển thị video stream
-                        const imageElement = document.getElementById('camera');
-                        const imageUrl = 'http://localhost:8888/capture_images';
-                        imageElement.src = imageUrl;
-                        alert('Bắt đầu lấy dữ liệu khuôn mặt');
-
-                        // Thực hiện độ trễ 2 giây rồi bắt đầu progress bar
-                        setTimeout(() => {
-                            centerText.style.display = 'block';  // Hiển thị lại center-text
-                            bar = new ProgressBar.Circle('#progress-circle', {
-                                color: '#4caf50',
-                                strokeWidth: 6,
-                                trailWidth: 6,
-                                trailColor: '#ddd',
-                                easing: 'easeInOut',
-                                duration: 20000,
-                                text: {
-                                    value: '',
-                                },
-                                from: { color: '#4caf50', width: 6 },
-                                to: { color: '#4caf50', width: 6 },
-                                step: function (state, circle) {
-                                    circle.path.setAttribute('stroke', state.color);
-                                    circle.path.setAttribute('stroke-width', state.width);
-
-                                    // Cập nhật tỷ lệ phần trăm hiển thị ở giữa vòng tròn
-                                    var value = Math.round(circle.value() * 100);
-                                    centerText.textContent = value + '%';
-                                    if (value === 100) {
-                                        centerText.innerHTML = '&#10004;'; // Hiển thị dấu tick khi xong
-                                        // Sau khi tiến trình 100%, chuyển nút về "Thêm mới" và disable form
-                                        submitButton.textContent = 'Thêm mới';
-                                        formElements.forEach(element => element.disabled = true);
-                                    }
-                                }
-                            });
-
-                            // Bắt đầu vòng tròn tiến độ
-                            bar.animate(1.0); // 100% trong 15 giây
-                        }, 2000);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Có lỗi xảy ra! Chi tiết: ' + error.message);
                     });
             } else {
-                // Nếu form không hợp lệ, thông báo cho người dùng
                 alert('Vui lòng điền đầy đủ thông tin hợp lệ!');
             }
         }
     });
-
 </script>
-
 </body>
 </html>

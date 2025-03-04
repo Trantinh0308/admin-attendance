@@ -25,7 +25,8 @@ public class MainController {
     private final AttendanceService attendanceService;
     private final CalendarService calendarService;
 
-    public MainController(AccountService accountService, AttendanceService attendanceService, CalendarService calendarService) {
+    public MainController(AccountService accountService, AttendanceService attendanceService,
+                          CalendarService calendarService) {
         this.accountService = accountService;
         this.attendanceService = attendanceService;
         this.calendarService = calendarService;

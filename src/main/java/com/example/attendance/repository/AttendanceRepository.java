@@ -11,7 +11,9 @@ import java.util.List;
 
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance,Long> {
-    boolean existsByEmployee_IdAndDate(Long employeeId, Date date);
+
+    @Query("SELECT COUNT(a) FROM Attendance a WHERE a.date = CURRENT_DATE AND a.employee.id = :employeeId")
+    long countByDateAndEmployeeId(@Param("employeeId") Long employeeId);
 
     @Query("SELECT new com.example.attendance.dto.AttendanceDTO3(a.imageCode,a.employee.id, a.employee.fullName, a.employee.department, a.date, a.time, a.status, a.deviceName) " +
             "FROM Attendance a " +

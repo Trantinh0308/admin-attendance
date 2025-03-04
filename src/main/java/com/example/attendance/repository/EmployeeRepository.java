@@ -10,6 +10,11 @@ import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+    Boolean existsEmployeeById(Long id);
+
+    Boolean existsEmployeeByPhoneNumber(String phoneNumber);
+
     @Query("SELECT e.id FROM Employee e WHERE e.account.id = :accountId")
     Optional<Long> findEmployeeIdByAccountId(@Param("accountId") Long accountId);
 }

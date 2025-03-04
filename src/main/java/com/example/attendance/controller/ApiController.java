@@ -1,5 +1,6 @@
 package com.example.attendance.controller;
 
+import com.example.attendance.config.Constants;
 import com.example.attendance.dto.AttendanceDTO;
 import com.example.attendance.dto.AttendanceDTO3;
 import com.example.attendance.dto.EmployeeDTO;
@@ -18,6 +19,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.sql.Date;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.lang.System.*;
+
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
@@ -35,12 +39,15 @@ public class ApiController {
     private final EmployeeService employeeService;
     private final AttendanceService attendanceService;
     private final ControlService controlService;
+    private final RestClient restClient;
 
-    public ApiController(AccountService accountService, EmployeeService employeeService, AttendanceService attendanceService, ControlService controlService) {
+    public ApiController(AccountService accountService, EmployeeService employeeService,
+                         AttendanceService attendanceService, ControlService controlService, RestClient.Builder restClientBuilder) {
         this.accountService = accountService;
         this.employeeService = employeeService;
         this.attendanceService = attendanceService;
         this.controlService = controlService;
+        this.restClient = restClientBuilder.baseUrl(Constants.URL_SERVO).build();
     }
 
     /**
@@ -52,14 +59,11 @@ public class ApiController {
         try {
             Account account = accountService.loginUserAccount(userDTO);
             return ResponseEntity.ok(account);
-
         } catch (AccountNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-
         } catch (InvalidMobileIdException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
@@ -89,6 +93,8 @@ public class ApiController {
             Map<String, Long> response = new HashMap<>();
             response.put("id", employee.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestAlertException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
@@ -138,6 +144,20 @@ public class ApiController {
         }
     }
 
+    @GetMapping("/attendance/today")
+    public ResponseEntity<Object> numberAttendanceInToday(@RequestParam Long employeeId) {
+        try {
+            Map<String, Long> response = new HashMap<>();
+            response.put("number", attendanceService.getNumberAttendanceInToday(employeeId));
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (BadRequestAlertException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+
     /**
      * control_api
      */
@@ -155,6 +175,15 @@ public class ApiController {
     @PostMapping("/door/status")
     public void saveDoorStatus(@RequestParam Boolean open) {
         controlService.saveDoorStatus(open);
+        String endpoint = open ? "/on" : "/off";
+        try {
+            restClient.get()
+                    .uri(endpoint)
+                    .retrieve()
+                    .body(String.class);
+        } catch (Exception e) {
+            err.println("Error sending command to ESP32: " + e.getMessage());
+        }
     }
 
     @PostMapping("/mode")

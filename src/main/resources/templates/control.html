@@ -251,7 +251,7 @@
 <script>
     const modeControl = document.getElementById("modeControl2");
     const lightSwitch = document.getElementById("lightswitch2");
-    const ipESP = "http://192.168.159.18";
+    const ipESP = "http://192.168.1.16";
     const xhr = new XMLHttpRequest();
 
     window.onload = function() {
@@ -264,22 +264,24 @@
                 } else {
                     lightSwitch.disabled = false;
                 }
-            })
-            .catch(error => {
-                console.error('Error fetching control status:', error);
-            });
 
-        fetch('/api/door/status')
-            .then(response => response.json())
-            .then(status => {
-                if (modeControl.checked) {
-                    lightSwitch.checked = status;
-                }
+                fetch('/api/door/status')
+                    .then(response => response.json())
+                    .then(doorStatus => {
+                        if (modeControl.checked) {
+                            lightSwitch.checked = doorStatus;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching door status:', error);
+                    });
+
             })
             .catch(error => {
-                console.error('Error fetching control status:', error);
+                console.error('Error fetching mode status:', error);
             });
     };
+
 
     function modeControlDoor() {
         if (modeControl.checked) {
@@ -350,7 +352,7 @@
     stompClient.connect({}, function (frame) {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/control', function (messageOutput) {
-            var open = messageOutput.body === 'true';
+            const open = messageOutput.body === 'true';
             if (modeControl.checked) {
                 lightSwitch.checked = open;
                 door();

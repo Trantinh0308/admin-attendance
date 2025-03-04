@@ -1,6 +1,7 @@
 package com.example.attendance.service;
 
 import com.example.attendance.dto.EmployeeDTO;
+import com.example.attendance.errors.BadRequestAlertException;
 import com.example.attendance.model.Account;
 import com.example.attendance.model.Employee;
 import com.example.attendance.repository.AccountRepository;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.hibernate.id.IdentifierGenerator.ENTITY_NAME;
 
 @Service
 public class EmployeeService {
@@ -19,19 +22,30 @@ public class EmployeeService {
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
     }
+
     public List<Employee> getAllEmployees(){
         return employeeRepository.findAll();
     }
+
     public Optional<Employee> getEmployeeById(long id){
         return employeeRepository.findById(id);
     }
+
+    public Boolean checkExistsEmployeeById(long id){
+        return employeeRepository.existsEmployeeById(id);
+    }
+
     public Optional<Long> getEmployeeIdByAccountId(long accountId){
         return employeeRepository.findEmployeeIdByAccountId(accountId);
     }
+
     public Employee saveEmployee(EmployeeDTO employeeDTO){
+        if (Boolean.TRUE.equals(employeeRepository.existsEmployeeByPhoneNumber(employeeDTO.getPhoneNumber()))){
+            throw new BadRequestAlertException("PhoneNumber exists",ENTITY_NAME,"PhoneNumber exists");
+        }
         Account account = new Account();
         account.setUsername(employeeDTO.getPhoneNumber());
-        account.setPassword("12345");
+        account.setPassword(Utils.generatePassword(8));
         account.setRole(2);
         accountRepository.save(account);
 

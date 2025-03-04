@@ -144,41 +144,46 @@
 <script src="../../dist/js/adminlte.min.js"></script>
 <script src="../../dist/js/demo.js"></script>
 <script>
-    const socketCam = new WebSocket('ws://localhost:8080/camera');
     const loadingSpinner = document.getElementById('loadingSpinner');
     const videoElement = document.getElementById('videoElement');
-    const imageContainer = document.getElementById('imageContainer');
-    const errorMessage = document.getElementById('errorMessage');  // Phần tử hiển thị thông báo lỗi
+    const errorMessage = document.getElementById('errorMessage');
 
+    const imageUrl = 'http://localhost:8888/video_feed';
+
+    // Hiển thị loading spinner
     loadingSpinner.style.display = 'block';
-    socketCam.addEventListener('open', () => {
-        setTimeout(() => {
+    videoElement.style.display = 'none'; // Ẩn videoElement trực tiếp
+
+    videoElement.addEventListener('load', () => { // Sử dụng 'load' thay vì 'loadeddata' cho img
+        // Dữ liệu đã được tải, ẩn loading spinner và hiển thị video
+        loadingSpinner.style.display = 'none';
+        videoElement.style.display = 'block';
+    }, false);
+
+    videoElement.addEventListener('error', () => {
+        // Xử lý lỗi nếu video không tải được
+        loadingSpinner.style.display = 'none';
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = 'Không thể kết nối với camera.';
+    }, false);
+
+    // Thêm timeout để ẩn loadingSpinner nếu video không tải được
+    const timeoutId = setTimeout(() => {
+        if (loadingSpinner.style.display === 'block') {
             loadingSpinner.style.display = 'none';
-        }, 2000);
-    });
-
-    socketCam.addEventListener('message', (event) => {
-        const message = event.data;
-
-        if (message.startsWith("Không tìm thấy camera")) {
-            setTimeout(() => {
-                errorMessage.innerText = message;
-                errorMessage.style.display = 'block';
-            }, 3000);
-            return;
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = 'Không thể kết nối với camera.';
         }
+    }, 10000); // 10 giây
 
-        const base64Image = message;
-        const img = new Image();
-        img.src = 'data:image/jpeg;base64,' + base64Image;
-        img.onload = () => {
-            videoElement.src = img.src;
-            imageContainer.style.display = 'block';
-        };
-    });
+    videoElement.addEventListener('load', () => {
+        clearTimeout(timeoutId); // Hủy timeout nếu video tải thành công
+    }, false);
 
-    socketCam.addEventListener('close', () => {
-        console.log('Disconnected from server');
+    videoElement.src = imageUrl;
+
+    window.addEventListener('beforeunload', function (e) {
+        navigator.sendBeacon('http://localhost:8888/close_connection', JSON.stringify({})); // Use sendBeacon
     });
 
     const socketNotification = new SockJS('/websocket');
@@ -232,22 +237,6 @@
             alertQueue.push(newAlert);
         });
     });
-
-// dieu khien cua
-//     const ipESP = "http://192.168.159.18";
-//     const xhr = new XMLHttpRequest();
-//     const socketControl = new SockJS('/websocket');
-//     const controlClient = Stomp.over(socketControl);
-//     controlClient.connect({}, function (frame) {
-//         console.log('Connected: ' + frame);
-//         controlClient.subscribe('/topic/control', function (messageOutput) {
-//             const open = messageOutput.body === 'true';
-//             if (modeControl.checked) {
-//                 xhr.open("GET", ipESP+"/on", open);
-//                 xhr.send();
-//             }
-//         });
-//     });
 </script>
 </body>
 </html>

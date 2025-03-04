@@ -5,8 +5,6 @@ import com.example.attendance.model.Employee;
 import com.example.attendance.model.Timekeeping;
 import com.example.attendance.model.WorkCalendar;
 import com.example.attendance.repository.AttendanceRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -19,7 +17,6 @@ import java.util.Optional;
 
 @Service
 public class CalendarService {
-    private static final Logger log = LogManager.getLogger(CalendarService.class);
     private final EmployeeService employeeService;
     private final AttendanceRepository attendanceRepository;
 

@@ -1,5 +1,7 @@
 package com.example.attendance.service;
 
+import com.example.attendance.errors.BadRequestAlertException;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalTime;
@@ -7,7 +9,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Random;
 
+import static org.hibernate.id.IdentifierGenerator.ENTITY_NAME;
+
 public class Utils {
+
+    private static final Random random = new Random();
+
+    public static String getAttendanceStatusByQuantity(long quantity) {
+        LocalTime currentTime = LocalTime.now();
+        if (quantity == 0) return "Check In";
+        else if (quantity == 1 && currentTime.isAfter(LocalTime.of(17, 0))) return "Check Out";
+        else throw new BadRequestAlertException("Attendance limit exceeded for this time", ENTITY_NAME, "Attendance limit exceeded for this time");
+    }
 
     public static Date createSqlDate(int day,int month,int year) {
         Calendar calendar = Calendar.getInstance();
@@ -41,5 +54,15 @@ public class Utils {
             case 7 -> "CN";
             default -> "";
         };
+    }
+
+    public static String generatePassword(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            password.append(characters.charAt(index));
+        }
+        return password.toString();
     }
 }
